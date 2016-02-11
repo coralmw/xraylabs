@@ -1,5 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
+# for curve fitting
+def gauss(x, *p):
+    A, mu, sigma = p
+    return A*np.exp(-(x-mu)**2/(2.*sigma**2))
 
 anglecounterror = [
 (15, 20, 3),
@@ -61,5 +67,14 @@ angle, count, error = [np.array(_) for _ in zip(*anglecounterror)]
 sortindxs = np.argsort(angle)
 angle, count, error = angle[sortindxs], count[sortindxs], error[sortindxs]
 
+kamin, kamax = np.argwhere(angle>43)[0], np.argwhere(angle<55)[-1]
+kaangle, kacount = angle[kamin:kamax], count[kamin:kamax]
+p0 = [200., 43, 3]
+coeff, var_matrix = curve_fit(gauss, kaangle, kacount, p0=p0)
+fitx = np.linspace(43, 48, 100)
+
 plt.errorbar(angle, count, xerr=0.25, yerr=error)
+plt.plot(fitx, gauss(fitx, *coeff), 'r')
+#plt.plot(angle[kamin:kamax], count[kamin:kamax], 'r')
+
 plt.show()
