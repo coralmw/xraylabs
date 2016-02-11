@@ -7,6 +7,14 @@ def gauss(x, *p):
     A, mu, sigma = p
     return A*np.exp(-(x-mu)**2/(2.*sigma**2))
 
+def peakfit(start, end):
+    minidx, maxidx = np.argwhere(angle>start)[0], np.argwhere(angle>end)[0]
+    slicedangle, slicedcount = angle[minidx:maxidx], count[minidx:maxidx]
+    p0 = [max(slicedcount), start, 3]
+    coeff, var_matrix = curve_fit(gauss, slicedangle, slicedcount, p0=p0)
+    return coeff
+
+
 anglecounterror = [
 (15, 20, 3),
 (20, 27, 5),
@@ -67,14 +75,16 @@ angle, count, error = [np.array(_) for _ in zip(*anglecounterror)]
 sortindxs = np.argsort(angle)
 angle, count, error = angle[sortindxs], count[sortindxs], error[sortindxs]
 
-kamin, kamax = np.argwhere(angle>43)[0], np.argwhere(angle<55)[-1]
-kaangle, kacount = angle[kamin:kamax], count[kamin:kamax]
-p0 = [200., 43, 3]
-coeff, var_matrix = curve_fit(gauss, kaangle, kacount, p0=p0)
-fitx = np.linspace(43, 48, 100)
+
+peaks = [('kb-1', 36, 42), ('ka-1', 43, 48), ('kb-2', 86, 89), ('ka-2', 98, 102), ]
+for peak, start, end in peaks:
+    coeff = peakfit(start, end)
+    print 'peak {} is at {}, {}'.format(peak,coeff[1],coeff)
+    fitx = np.linspace(start, end+3, 100)
+    plt.plot(fitx, gauss(fitx, *coeff), 'r')
+
 
 plt.errorbar(angle, count, xerr=0.25, yerr=error)
-plt.plot(fitx, gauss(fitx, *coeff), 'r')
 #plt.plot(angle[kamin:kamax], count[kamin:kamax], 'r')
 
 plt.show()
