@@ -70,21 +70,25 @@ anglecounterror = [
 (88.5, 7, 3),
 ]
 
-angle, count, error = [np.array(_) for _ in zip(*anglecounterror)]
+if __name__ == '__main__':
+    angle, count, error = [np.array(_) for _ in zip(*anglecounterror)]
+    sortindxs = np.argsort(angle)
+    angle, count, error = angle[sortindxs], count[sortindxs], error[sortindxs]
 
-sortindxs = np.argsort(angle)
-angle, count, error = angle[sortindxs], count[sortindxs], error[sortindxs]
-
-
-peaks = [('kb-1', 36, 42), ('ka-1', 43, 48), ('kb-2', 86, 89), ('ka-2', 98, 102), ]
-for peak, start, end in peaks:
-    coeff = peakfit(start, end)
-    print 'peak {} is at {}, {}'.format(peak,coeff[1],coeff)
-    fitx = np.linspace(start, end+3, 100)
-    plt.plot(fitx, gauss(fitx, *coeff), 'r')
+    fig, ax = plt.subplots()
+    ax.errorbar(angle, count, xerr=0.25, yerr=error)
 
 
-plt.errorbar(angle, count, xerr=0.25, yerr=error)
-#plt.plot(angle[kamin:kamax], count[kamin:kamax], 'r')
+    peaks = [('$k_\\beta$-1', 36, 42), ('$k_\\alpha$-1', 43, 48), ('$k_\\beta$-2', 86, 89), ('$k_\\alpha$-2', 98, 102), ]
+    for peak, start, end in peaks:
+        coeff = peakfit(start, end)
+        print 'peak {} is at {}, {}'.format(peak,coeff[1],coeff)
+        fitx = np.linspace(start, end+3, 100)
+        ax.plot(fitx, gauss(fitx, *coeff), label='{} fit, center={:03.2f}'.format(peak, coeff[1],), linewidth=2)
 
-plt.show()
+    legend = ax.legend(loc='upper right', shadow=True)
+    ax.set_xlabel('angle, 2$\\theta$')
+    ax.set_ylabel('count rate, per s')
+    ax.set_title('LiF bragg peaks')
+
+    plt.show()
