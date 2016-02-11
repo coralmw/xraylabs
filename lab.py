@@ -56,7 +56,10 @@ anglecounterror = [
 (88.5, 7, 3),
 ]
 
-angle, count, error = zip(*anglecounterror)
+angle, count, error = [np.array(_) for _ in zip(*anglecounterror)]
 
-plt.plot(angle, count, 'bo')
+sortindxs = np.argsort(angle)
+angle, count, error = angle[sortindxs], count[sortindxs], error[sortindxs]
+
+plt.errorbar(angle, count, xerr=0.25, yerr=error)
 plt.show()
